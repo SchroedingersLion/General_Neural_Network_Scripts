@@ -16,7 +16,6 @@ class SGDm_original(Optimizer):
             raise ValueError("Invalid momentum value: {}".format(momentum))
         if weight_decay < 0.0:
             raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
-        print("SGDm weight decay does NOT work!!!")
 
         defaults = dict(lr=lr, momentum=momentum, weight_decay=weight_decay, p_scaling=p_scaling)
         super(SGDm_original, self).__init__(params, defaults)
@@ -38,16 +37,18 @@ class SGDm_original(Optimizer):
         lr = group["lr"]
         mu = group["momentum"]
         h = group["p_scaling"]
+        weight_decay = group["weight_decay"]
         for theta in group['params']:
             if theta.grad is None:
                 continue
 
             p = self.state[theta]["momentum_buffer"]
- 
+            theta.grad.data.add_(theta.data, alpha=weight_decay)  # weight decay
+            
             # perform actual step
-            p.mul_(mu/h)
-            p.add_(-lr/h * theta.grad)
-            theta.add_(h*p)    
+            p.mul_(mu/h)                       
+            p.add_(lr/h * theta.grad)
+            theta.add_(-h*p)    
 
         return loss
 
