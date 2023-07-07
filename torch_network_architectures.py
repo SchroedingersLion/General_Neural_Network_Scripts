@@ -32,25 +32,26 @@ class Net(nn.Module):
         # output = torch.sigmoid(x)
         return output
     
+    
     def test(self, data_loader, criterion):                                     ## returns network output to given input.
         # self.eval()
         loss = 0
         accu = 0        
         with torch.no_grad():                                                   ## don't keep track of gradients.
-            for (features, targets) in data_loader:                             ## iterate over batches.
-                # output = self.forward(features)                               ## get model output.
-                output = self.forward(features.squeeze().
-                view((features.shape[0],-1)))                                 ## for images.
+            for (features, targets) in data_loader:                             ## iterate over batches.                      
                 
-                loss += F.nll_loss(output, targets)          ## add losses of all samples in batch.
-                accu += np.count_nonzero( targets==torch.argmax(output, dim=1) )/len(targets) 
+                ## FOR IMAGE DATA:
+                # output = self.forward(features.squeeze().view((features.shape[0],-1)))                     
+                # loss += criterion(output, targets)          
+                # accu += np.count_nonzero( targets==torch.argmax(output, dim=1) )  
                 
-                # loss += criterion(output, torch.unsqueeze(targets, dim=1))      ## the unsqueeze is necessary for F.binary_cross_entropy, 
-                #                                                                 ## change otherwise.   
-                # accu += np.count_nonzero(torch.unsqueeze(targets, dim=1) == 
-                #                          (output >= 0.5))/ len(targets)
+                output = self.forward(features)  
+                loss += criterion(output, torch.unsqueeze(targets, dim=1))      ## the unsqueeze is necessary for F.binary_cross_entropy, 
+                                                                                ## change otherwise.   
+                accu += np.count_nonzero(torch.unsqueeze(targets, dim=1) == 
+                                          (output >= 0.5))
 
-        return (loss, accu)
+        return (loss, accu / len(targets))
 
 
                
@@ -76,23 +77,26 @@ class Net_large(nn.Module):
         output = torch.sigmoid(x)
         return output
     
+    
     def test(self, data_loader, criterion):                                ## returns network output to given input.
         # self.eval()
         loss = 0
         accu = 0        
         with torch.no_grad():                                              ## don't keep track of gradients.
             for (features, targets) in data_loader:                        ## iterate over batches.
-                output = self.forward(features)                            ## get model output.
-                # output = self.forward(features.squeeze().
-                # view((features.shape[0],-1)))                            ## for images.
                 
-                                                                           ## add losses of all samples in batch.
-                loss += criterion(output, torch.unsqueeze(targets, dim=1)) ## the unsqueeze is necessary for F.binary_cross_entropy, 
-                                                                           ## change otherwise.   
+                # ## FOR IMAGE DATA:
+                # output = self.forward(features.squeeze().view((features.shape[0],-1)))                     
+                # loss += criterion(output, targets)          
+                # accu += np.count_nonzero( targets==torch.argmax(output, dim=1) )  
+                
+                output = self.forward(features)  
+                loss += criterion(output, torch.unsqueeze(targets, dim=1))      ## the unsqueeze is necessary for F.binary_cross_entropy, 
+                                                                                ## change otherwise.   
                 accu += np.count_nonzero(torch.unsqueeze(targets, dim=1) == 
-                                         (output >= 0.5)) / len(targets)
+                                          (output >= 0.5))
  
-        return (loss, accu)
+        return (loss, accu / len(targets))
     
 
 
@@ -139,15 +143,16 @@ class ConvNet(nn.Module):
                                                                             ## add losses of all samples in batch.
                 loss += criterion(output, targets)
                 _, predicted = torch.max(output,1)
-                accu += torch.sum(predicted == targets) / len(targets)
+                accu += torch.sum(predicted == targets) 
 
-        return (loss, accu)
+        return (loss, accu / len(targets))
     
     
 
 def acti_func(x):               # activation function 1/(1+x²).
     res = 1/(1+x**2)
     return res
+
 
 class Net_molec(nn.Module):
     """
@@ -177,17 +182,7 @@ class Net_molec(nn.Module):
         output = x
         return output
     
-    # def test(self, data_loader, criterion):                                   ## returns network output to given input.
-    #     # self.eval()
-    #     l2_error = 0       
-    #     with torch.no_grad():                                                 ## don't keep track of gradients.
-    #         for (features, targets) in data_loader:                           ## iterate over batches.
-    #             output = self.forward(features)                               ## get model output.
-                
-    #             ## Add Losses of all Samples in Batch.
-    #             l2_error += criterion(output, targets.unsqueeze(dim=1))  
- 
-    #     return torch.sqrt( 1/len(data_loader.dataset) * l2_error )
+
     def test(self, data_loader, criterion, scale_vals=(0,1)):                   ## returns network output to given input.
         # self.eval()
         l2_error = 0       

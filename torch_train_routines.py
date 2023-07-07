@@ -5,7 +5,7 @@ import time
 def train_model_classi(model, optimizer, criterion, epochs, trainloader, scheduler=None, testloader=None, eval_freq=0):
     """
     Training routine for N-class classification problem. Expects log_softmax as network output and criterion nll_loss.
-    Design problems: criterion is hardcoded in model.test(). For image data, feature tensor needs to be squeezed
+    Design problems: criterion is hardcoded in model.test().  For image data, feature tensor needs to be squeezed
     before feed-in to model.forward().
     """
     
@@ -106,7 +106,7 @@ def train_model_classi2(model, optimizer, criterion, epochs, trainloader, schedu
             
             loss.backward()
             optimizer.step()
-            # print(model.lin3.bias)
+
         if scheduler is not None: scheduler.step()
         
         if testmode==True and epoch % eval_freq==0: # obtain test values
