@@ -5,7 +5,8 @@ import time
 def train_model_classi(model, optimizer, criterion, epochs, trainloader, scheduler=None, testloader=None, eval_freq=0):
     """
     Training routine for N-class classification problem. Expects log_softmax as network output and criterion nll_loss.
-    Design problem: criterion is hardcoded in model.test().
+    Design problems: criterion is hardcoded in model.test(). For image data, feature tensor needs to be squeezed
+    before feed-in to model.forward().
     """
     
     loss_train = np.zeros(epochs+1)
@@ -33,11 +34,16 @@ def train_model_classi(model, optimizer, criterion, epochs, trainloader, schedul
     for epoch in np.arange(1,epochs+1):
         print("Epoch ", epoch)
         for (batchidx, (features, targets)) in enumerate(trainloader): 
-            output = model(features)
+            
+            # output = model(features)
+            
+            output = model(features.squeeze().    # FOR IMAGES
+            view((features.shape[0],-1)))
+            
             optimizer.zero_grad()
             loss = criterion(output, targets)
             loss_train[epoch] += loss.detach()
-            # print(loss_train.type)
+
             _, predicted = torch.max(output,1)
             accu_train[epoch] += torch.sum(predicted == targets) / len(targets)
             
@@ -60,7 +66,8 @@ def train_model_classi(model, optimizer, criterion, epochs, trainloader, schedul
 def train_model_classi2(model, optimizer, criterion, epochs, trainloader, scheduler=None, testloader=None, eval_freq=0):
     """
     2-class classification problem. Currently expects single sigmoidal output and criterion binary cross entropy loss.
-    Design problem: criterion is hardcoded in model.test().
+    Design problems: criterion is hardcoded in model.test(). For image data, feature tensor needs to be squeezed
+    before feed-in to model.forward().
     """
     
     loss_train = np.zeros(epochs+1)
@@ -89,6 +96,9 @@ def train_model_classi2(model, optimizer, criterion, epochs, trainloader, schedu
         # print("Epoch ", epoch)
         for (batchidx, (features, targets)) in enumerate(trainloader):
             output = model(features)
+            # output = model(features.squeeze().    # FOR IMAGES
+            # view((features.shape[0],-1)))           
+            
             optimizer.zero_grad()
             loss = criterion(output, targets.unsqueeze(1))
             loss_train[epoch] += loss.detach()

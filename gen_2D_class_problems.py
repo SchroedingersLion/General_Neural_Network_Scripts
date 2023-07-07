@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 """Script to generate various 2-dimensional K-classification problems 
 to test novel training schemes on."""
 
-problem_type = "spiral"  # choose problem type to generate 
+problem_type = "trigo"  # choose problem type to generate 
                         # until now, allowed is "trigo" for a trigonometric data set
                         # and "spiral" for Swiss Roll type spirals.
                         # details of problems need to be specified below.
@@ -35,7 +35,6 @@ if problem_type == "trigo":
         X[N*j:N*(j+1)] = np.concatenate((x1,x2), axis=1)
         y[N*j:N*(j+1)] = j
     
-
     np.save("trig_train_features.npy", X)   # write train features and labels
     np.save("trig_train_labels.npy", y)
     

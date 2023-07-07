@@ -28,8 +28,8 @@ class Net(nn.Module):
         x = self.lin1(x)
         x = torch.relu(x)
         x = self.lin2(x)
-        # output = F.log_softmax(x, dim=1)
-        output = torch.sigmoid(x)
+        output = F.log_softmax(x, dim=1)
+        # output = torch.sigmoid(x)
         return output
     
     def test(self, data_loader, criterion):                                     ## returns network output to given input.
@@ -38,16 +38,17 @@ class Net(nn.Module):
         accu = 0        
         with torch.no_grad():                                                   ## don't keep track of gradients.
             for (features, targets) in data_loader:                             ## iterate over batches.
-                output = self.forward(features)                                 ## get model output.
-                # output = self.forward(features.squeeze().
-                # view((features.shape[0],-1)))                                 ## for images.
+                # output = self.forward(features)                               ## get model output.
+                output = self.forward(features.squeeze().
+                view((features.shape[0],-1)))                                 ## for images.
                 
-                # loss += F.nll_loss(output, targets, reduction="sum")          ## add losses of all samples in batch.
-                # accu += np.count_nonzero( targets==torch.argmax(output, dim=1) ) 
-                loss += criterion(output, torch.unsqueeze(targets, dim=1))      ## the unsqueeze is necessary for F.binary_cross_entropy, 
-                                                                                ## change otherwise.   
-                accu += np.count_nonzero(torch.unsqueeze(targets, dim=1) == 
-                                         (output >= 0.5))/ len(targets)
+                loss += F.nll_loss(output, targets)          ## add losses of all samples in batch.
+                accu += np.count_nonzero( targets==torch.argmax(output, dim=1) )/len(targets) 
+                
+                # loss += criterion(output, torch.unsqueeze(targets, dim=1))      ## the unsqueeze is necessary for F.binary_cross_entropy, 
+                #                                                                 ## change otherwise.   
+                # accu += np.count_nonzero(torch.unsqueeze(targets, dim=1) == 
+                #                          (output >= 0.5))/ len(targets)
 
         return (loss, accu)
 
@@ -285,4 +286,3 @@ class ada_Net_molec(nn.Module):
                 l2_error += criterion(output, targets.unsqueeze(dim=1))  
  
         return torch.sqrt( 1/len(data_loader.dataset) * l2_error )
-     
